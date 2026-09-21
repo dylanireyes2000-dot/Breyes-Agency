@@ -105,6 +105,12 @@
       radial-gradient(90% 50% at 10% 100%, rgba(24,90,150,0.14), transparent 60%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
   }
+  #fluid{ position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .readscrim{
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(60% 50% at 50% 40%, rgba(2,3,8,0.5) 0%, rgba(2,3,8,0.28) 45%, rgba(2,3,8,0) 75%),
+                linear-gradient(180deg, rgba(2,3,8,0.2) 0%, rgba(2,3,8,0.55) 100%);
+  }
 
   .page{ position: relative; z-index: 1; }
   ::selection{ background: rgba(47,178,255,0.35); color: #fff; }
@@ -155,19 +161,9 @@
 
   /* ---- hero ---- */
   .hero{ min-height: 92vh; display: flex; align-items: center; padding-top: clamp(60px, 8vh, 100px); }
-  .hero-grid{ display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(24px, 5vw, 64px); align-items: center; width: 100%; max-width: 1320px; margin: 0 auto; }
+  .hero-grid{ width: 100%; max-width: 780px; margin: 0 auto; }
   .hero-cta{ margin-top: 34px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
   .hero-fine{ margin-top: 18px; font-family: var(--f-mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
-  .hero-visual{ position: relative; aspect-ratio: 1 / 1; width: 100%; max-width: 560px; justify-self: center; }
-  .hero-visual canvas{ position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 28px; }
-  .hero-visual-fallback{
-    position: absolute; inset: 0; border-radius: 28px; overflow: hidden;
-    background: radial-gradient(60% 60% at 50% 42%, rgba(47,178,255,0.35), transparent 70%), radial-gradient(80% 80% at 70% 80%, rgba(10,95,168,0.28), transparent 70%);
-  }
-  @media (max-width: 900px){
-    .hero-grid{ grid-template-columns: 1fr; }
-    .hero-visual{ order: -1; max-width: 380px; margin: 0 auto 8px; }
-  }
 
   /* ---- services ---- */
   .svc-grid{ margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
@@ -212,6 +208,8 @@
 </style>
 
 <div class="bg-wash" aria-hidden="true"></div>
+<canvas id="fluid" aria-hidden="true"></canvas>
+<div class="readscrim" aria-hidden="true"></div>
 
 <div class="page">
 
@@ -238,10 +236,6 @@
             <a class="btn btn-ghost" href="#s-process">See the process</a>
           </div>
           <p class="hero-fine reveal">A real conversation first. No pitch, no pressure.</p>
-        </div>
-        <div class="hero-visual reveal">
-          <div class="hero-visual-fallback" aria-hidden="true"></div>
-          <canvas id="fluid" aria-hidden="true"></canvas>
         </div>
       </div>
     </section>
@@ -400,17 +394,17 @@
 
 <script>
 /* ============================================================
-   Hero fluid simulation — real-time GPU stable-fluids (Jos Stam
-   method): velocity + dye fields advected, made divergence-free
-   via a Jacobi pressure solve, with vorticity confinement for the
-   swirl. Mouse/touch injects velocity + color ("splats"). Runs
-   only in the hero canvas, pauses off-screen/hidden, and bows out
-   entirely on reduced-motion, small/touch screens, or no WebGL.
+   Site-wide fluid background — real-time GPU stable-fluids (Jos
+   Stam method): velocity + dye fields advected, made divergence-
+   free via a Jacobi pressure solve, with vorticity confinement for
+   the swirl. Mouse/touch anywhere on the page injects velocity +
+   color ("splats"). Runs full-viewport behind every section, pauses
+   when the tab is hidden or you're mid-scroll, and bows out entirely
+   on reduced-motion, small/touch screens, or no WebGL.
    ============================================================ */
 (function () {
-  var wrap = document.querySelector(".hero-visual");
   var canvas = document.getElementById("fluid");
-  if (!wrap || !canvas) return;
+  if (!canvas) return;
 
   var reduce = false;
   try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
@@ -677,10 +671,9 @@
   var lastPointer = { x: 0.5, y: 0.5 };
 
   function resize() {
-    var rect = wrap.getBoundingClientRect();
-    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    var w = Math.max(1, Math.round(rect.width * dpr));
-    var h = Math.max(1, Math.round(rect.height * dpr));
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    var w = Math.max(1, Math.round(window.innerWidth * dpr));
+    var h = Math.max(1, Math.round(window.innerHeight * dpr));
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
   }
   resize();
@@ -707,27 +700,22 @@
   function randomColor() { var h = HUES[(Math.random() * HUES.length) | 0]; return [h[0] * 0.55, h[1] * 0.55, h[2] * 0.55]; }
 
   function updatePointerFromEvent(clientX, clientY) {
-    var rect = wrap.getBoundingClientRect();
-    var x = (clientX - rect.left) / rect.width;
-    var y = 1.0 - (clientY - rect.top) / rect.height;
-    return { x: x, y: y, inside: x >= -0.15 && x <= 1.15 && y >= -0.15 && y <= 1.15 };
+    var x = clientX / window.innerWidth;
+    var y = 1.0 - clientY / window.innerHeight;
+    return { x: x, y: y };
   }
 
-  var heroEl = document.getElementById("s-hero");
-  heroEl.addEventListener("mousemove", function (ev) {
+  window.addEventListener("mousemove", function (ev) {
     var p = updatePointerFromEvent(ev.clientX, ev.clientY);
-    if (!p.inside) return;
     pointer.dx = (p.x - lastPointer.x) * config.SPLAT_FORCE;
     pointer.dy = (p.y - lastPointer.y) * config.SPLAT_FORCE;
     pointer.x = p.x; pointer.y = p.y; pointer.moved = true;
     lastPointer.x = p.x; lastPointer.y = p.y;
   }, { passive: true });
-  heroEl.addEventListener("mouseleave", function () { pointer.moved = false; });
   if (!hasFinePointer) {
-    heroEl.addEventListener("touchmove", function (ev) {
+    window.addEventListener("touchmove", function (ev) {
       if (!ev.touches || !ev.touches[0]) return;
       var p = updatePointerFromEvent(ev.touches[0].clientX, ev.touches[0].clientY);
-      if (!p.inside) return;
       pointer.dx = (p.x - lastPointer.x) * config.SPLAT_FORCE;
       pointer.dy = (p.y - lastPointer.y) * config.SPLAT_FORCE;
       pointer.x = p.x; pointer.y = p.y; pointer.moved = true;
@@ -738,11 +726,9 @@
   /* gentle ambient drift so the water is alive even before any input */
   var ambientT = 0;
 
-  var visible = true;
-  var io2 = new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }, { threshold: 0.05 });
-  io2.observe(wrap);
+  var visible = true; // full-viewport now, so "visible" tracks only tab visibility
   var pageVisible = !document.hidden;
-  document.addEventListener("visibilitychange", function () { pageVisible = !document.hidden; });
+  document.addEventListener("visibilitychange", function () { pageVisible = !document.hidden; visible = pageVisible; });
 
   var lastTime = performance.now();
   var fc = 0, tAccum = 0, adapted = false;
