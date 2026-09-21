@@ -1,4 +1,4 @@
-# Bryan C. Scales — site
+# Breyes Agency — site
 
 Single-file static site (`index.html`: inline CSS + JS, no build step). Deployed on Cloudflare Pages.
 
@@ -12,7 +12,7 @@ Edit `index.html` directly, commit, push. There is no compile step — this is a
 
 ## Outstanding (not yet done)
 
-- **Domain**: not registered yet. Canonical/OG/schema URLs in `index.html` and `robots.txt`/`sitemap.xml` currently point at `https://www.bryancscales.com` as a placeholder — update everywhere (grep for `bryancscales.com`) once a real domain is picked, whether or not it's that one.
+- **Domain**: not registered yet. Canonical/OG/schema URLs in `index.html` and `robots.txt`/`sitemap.xml` currently point at `https://www.breyesagency.com` as a placeholder — update everywhere (grep for `breyesagency.com`) once a real domain is picked, whether or not it's that one.
 - **Favicons + `site.webmanifest`**: skipped. No source logo/brand-mark image exists yet to generate the icon set from. Needs a 1024x1024 source image, then run through the standard favicon pipeline (SOP §10.3).
 - **OG image**: skipped for the same reason — no 1200x630 social-preview image yet.
 - **Tracking stack** (GA4, Meta Pixel, Microsoft Clarity): not wired in. No tracking IDs yet.
