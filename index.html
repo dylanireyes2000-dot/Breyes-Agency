@@ -404,8 +404,13 @@
    on reduced-motion, small/touch screens, or no WebGL.
    ============================================================ */
 (function () {
+  function diag(msg) {
+    try { console.debug("[water] " + msg); } catch (e) {}
+  }
+  try {
+
   var canvas = document.getElementById("fluid");
-  if (!canvas) return;
+  if (!canvas) { diag("no canvas element found"); return; }
 
   var reduce = false;
   try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
@@ -413,7 +418,7 @@
   var hasFinePointer = true;
   try { hasFinePointer = window.matchMedia("(pointer: fine)").matches; } catch (e) {}
 
-  if (reduce || narrow) return; // CSS gradient fallback stays visible
+  if (reduce || narrow) { diag("off (reduced-motion=" + reduce + ", narrow=" + narrow + ", width=" + window.innerWidth + ")"); return; }
 
   var gl, ext;
   (function initGL() {
@@ -473,7 +478,7 @@
 
     ext = { isWebGL2: isWebGL2, formatRGBA: formatRGBA, formatRG: formatRGBA, formatR: formatRGBA, halfFloatTexType: texType, supportLinearFiltering: !!supportLinearFloat };
   })();
-  if (!gl) return; // no WebGL — CSS gradient fallback stays visible
+  if (!gl) { diag("no WebGL context at all (both webgl2 and webgl getContext returned null)"); return; }
 
   /* ---- config ---- */
   var config = {
@@ -616,7 +621,10 @@
   var progPressure = createProgram(baseVertexShader, pressureShader);
   var progGradientSubtract = createProgram(baseVertexShader, gradientSubtractShader);
   var progDisplay = createProgram(baseVertexShader, displayShader);
-  if (!progClear || !progSplat || !progAdvection || !progDivergence || !progCurl || !progVorticity || !progPressure || !progGradientSubtract || !progDisplay) return;
+  if (!progClear || !progSplat || !progAdvection || !progDivergence || !progCurl || !progVorticity || !progPressure || !progGradientSubtract || !progDisplay) {
+    diag("shader compile/link failed: " + JSON.stringify({ clear: !!progClear, splat: !!progSplat, advection: !!progAdvection, divergence: !!progDivergence, curl: !!progCurl, vorticity: !!progVorticity, pressure: !!progPressure, gradSub: !!progGradientSubtract, display: !!progDisplay }));
+    return;
+  }
 
   var quadBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
@@ -673,7 +681,8 @@
   }
   initFBOs();
   gl.bindFramebuffer(gl.FRAMEBUFFER, dye.read.fbo);
-  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) return; // broken on this GPU/driver — CSS fallback stays visible
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) { diag("framebuffer incomplete on this GPU/driver (webgl2=" + ext.isWebGL2 + ")"); return; }
+  diag("running OK (webgl2=" + ext.isWebGL2 + ", linearFilter=" + ext.supportLinearFiltering + ")");
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
   function useProgram(p) { gl.useProgram(p.program); return p.uniforms; }
@@ -845,5 +854,7 @@
     if (document.hidden && raf) { cancelAnimationFrame(raf); raf = null; }
     else if (!document.hidden && !raf) { lastTime = performance.now(); raf = requestAnimationFrame(frame); }
   });
+
+  } catch (e) { diag("JS error: " + e.message); }
 })();
 </script>
