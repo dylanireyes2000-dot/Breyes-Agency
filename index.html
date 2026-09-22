@@ -418,7 +418,7 @@
   var hasFinePointer = true;
   try { hasFinePointer = window.matchMedia("(pointer: fine)").matches; } catch (e) {}
 
-  if (reduce || narrow) { diag("off (reduced-motion=" + reduce + ", narrow=" + narrow + ", width=" + window.innerWidth + ")"); return; }
+  if (reduce) { diag("off (reduced-motion)"); return; }
 
   var gl, ext;
   (function initGL() {
@@ -480,8 +480,19 @@
   })();
   if (!gl) { diag("no WebGL context at all (both webgl2 and webgl getContext returned null)"); return; }
 
-  /* ---- config ---- */
-  var config = {
+  /* ---- config (lighter starting point on phones/small screens, not just
+     the reactive post-hoc downscale — weaker mobile GPUs and battery cost
+     both matter here, so start conservative instead of finding out slow) ---- */
+  var config = narrow ? {
+    SIM_RESOLUTION: 96,
+    DYE_RESOLUTION: 360,
+    DENSITY_DISSIPATION: 0.985,
+    VELOCITY_DISSIPATION: 0.988,
+    PRESSURE_ITERATIONS: 10,
+    CURL: 20,
+    SPLAT_RADIUS: 0.26,
+    SPLAT_FORCE: 4200
+  } : {
     SIM_RESOLUTION: 128,
     DYE_RESOLUTION: 640,
     DENSITY_DISSIPATION: 0.985,
