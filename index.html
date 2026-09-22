@@ -426,19 +426,19 @@
     var halfFloat, supportLinearFloat;
     if (isWebGL2) {
       gl.getExtension("EXT_color_buffer_float");
-      supportLinearFloat = gl.getExtension("OES_texture_float_linear");
+      gl.getExtension("OES_texture_float_linear");
       halfFloat = { HALF_FLOAT: gl.HALF_FLOAT };
+      supportLinearFloat = true; // WebGL2 core: half-float linear filtering needs no extension
     } else {
       halfFloat = gl.getExtension("OES_texture_half_float");
       supportLinearFloat = gl.getExtension("OES_texture_half_float_linear");
     }
     gl.clearColor(0, 0, 0, 0);
 
-    var formatRGBA, formatRG, formatR, texType;
+    var formatRGBA, texType;
     texType = halfFloat ? (isWebGL2 ? gl.HALF_FLOAT : halfFloat.HALF_FLOAT_OES) : gl.UNSIGNED_BYTE;
 
-    function supportedFormat(internal, format, type) {
-      if (!isWebGL2) return { internalFormat: format, format: format };
+    function fboComplete(internal, format, type) {
       var tex = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -451,20 +451,27 @@
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
       var ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
       gl.deleteTexture(tex); gl.deleteFramebuffer(fbo);
-      return ok ? { internalFormat: internal, format: format } : null;
+      return ok;
     }
 
+    /* Use one RGBA format everywhere (never R/RG). Single/dual-channel float
+       render targets have inconsistent support (notably Safari/Metal), and a
+       failed fallback there previously left internalFormat/type mismatched —
+       silently broken rendering with no thrown error. RGBA half-float is far
+       more universally supported; shaders only read the channels they need. */
     if (isWebGL2) {
-      formatRGBA = supportedFormat(gl.RGBA16F, gl.RGBA, texType) || { internalFormat: gl.RGBA, format: gl.RGBA };
-      formatRG = supportedFormat(gl.RG16F, gl.RG, texType) || { internalFormat: gl.RGBA, format: gl.RGBA };
-      formatR = supportedFormat(gl.R16F, gl.RED, texType) || { internalFormat: gl.RGBA, format: gl.RGBA };
+      if (fboComplete(gl.RGBA16F, gl.RGBA, texType)) {
+        formatRGBA = { internalFormat: gl.RGBA16F, format: gl.RGBA };
+      } else {
+        texType = gl.UNSIGNED_BYTE;
+        formatRGBA = { internalFormat: gl.RGBA8, format: gl.RGBA };
+      }
     } else {
       formatRGBA = { internalFormat: gl.RGBA, format: gl.RGBA };
-      formatRG = { internalFormat: gl.RGBA, format: gl.RGBA };
-      formatR = { internalFormat: gl.RGBA, format: gl.RGBA };
+      if (!fboComplete(formatRGBA.internalFormat, formatRGBA.format, texType)) texType = gl.UNSIGNED_BYTE;
     }
 
-    ext = { isWebGL2: isWebGL2, formatRGBA: formatRGBA, formatRG: formatRG, formatR: formatR, halfFloatTexType: texType, supportLinearFiltering: !!supportLinearFloat };
+    ext = { isWebGL2: isWebGL2, formatRGBA: formatRGBA, formatRG: formatRGBA, formatR: formatRGBA, halfFloatTexType: texType, supportLinearFiltering: !!supportLinearFloat };
   })();
   if (!gl) return; // no WebGL — CSS gradient fallback stays visible
 
@@ -665,6 +672,9 @@
     pressure = createDoubleFBO(simRes, simRes, ext.formatR.internalFormat, ext.formatR.format, ext.halfFloatTexType, gl.NEAREST);
   }
   initFBOs();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, dye.read.fbo);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) return; // broken on this GPU/driver — CSS fallback stays visible
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
   function useProgram(p) { gl.useProgram(p.program); return p.uniforms; }
 
