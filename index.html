@@ -130,7 +130,7 @@
   .nav-links{ display: flex; gap: 30px; align-items: center; }
   .nav-links a{ font-size: .92rem; font-weight: 600; color: var(--ink-soft); text-decoration: none; letter-spacing: .01em; transition: color .25s var(--ease); }
   .nav-links a:hover{ color: var(--blue-bright); }
-  @media (max-width: 760px){ .nav-links a.hide-sm{ display: none; } }
+  @media (max-width: 760px){ .nav-links a.hide-sm{ display: none; } .nav-links{ gap: 18px; } }
 
   .btn{ display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-body); font-weight: 600; font-size: 1rem; letter-spacing: .01em; text-decoration: none; padding: 15px 26px; border-radius: 999px; cursor: pointer; border: 1px solid transparent; transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
   .btn-blue{
@@ -233,6 +233,7 @@
   <nav>
     <a class="brand" href="#s-hero">Breyes <b>Scales</b></a>
     <div class="nav-links">
+      <a href="/offers/">Deals</a>
       <a class="hide-sm" href="#s-services">Services</a>
       <a class="hide-sm" href="/seo/">SEO &amp; AI Search</a>
       <a class="hide-sm" href="#s-about">About</a>
@@ -348,6 +349,7 @@
       <div class="foot-top">
         <span class="foot-brand">Breyes <span style="color:var(--blue)">Scales</span></span>
         <div class="foot-contact">
+          <a href="/offers/">Deals</a>
           <a href="mailto:breyesbusinesscr@gmail.com">breyesbusinesscr@gmail.com</a>
           <a href="tel:+13603168599">(360) 316-8599</a>
         </div>
