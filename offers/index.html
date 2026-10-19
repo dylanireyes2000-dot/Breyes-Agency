@@ -81,7 +81,7 @@
   .nav-links > a:not(.btn){ font-size:.92rem; font-weight:600; color:var(--ink-soft); text-decoration:none; transition:color .25s var(--ease); }
   .nav-links > a:not(.btn):hover, .nav-links > a[aria-current]{ color:var(--blue-bright); }
   .show-xs{ display:none; }
-  @media (max-width:760px){ .nav-links a.hide-sm{ display:none; } .nav-links{ gap:10px; } }
+  @media (max-width:960px){ .nav-links a.hide-sm{ display:none; } .nav-links{ gap:10px; } }
   @media (max-width:420px){ .hide-xs{ display:none; } .show-xs{ display:inline; } }
 
   /* ---- mobile menu ---- */
@@ -96,8 +96,8 @@
   .mm-panel a{ display:block; padding:14px 2px; font-family:var(--f-body); font-size:1.05rem; font-weight:600; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-soft); }
   .mm-panel a:last-child{ border-bottom:0; }
   .mm-panel a:hover, .mm-panel a[aria-current]{ color:var(--blue-bright); }
-  @media (max-width: 760px){ .mm-toggle{ display:inline-flex; } }
-  @media (min-width: 761px){ .mm-panel{ display:none !important; } }
+  @media (max-width: 960px){ .mm-toggle{ display:inline-flex; } }
+  @media (min-width: 961px){ .mm-panel{ display:none !important; } }
 
   .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--f-body); font-weight:600; font-size:.98rem; text-decoration:none; padding:14px 22px; border-radius:999px; border:1px solid transparent; cursor:pointer; transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease); }
   .btn-blue{ color:#001523; background:linear-gradient(120deg, var(--blue-deep), var(--blue) 55%, var(--blue-bright)); box-shadow:0 0 0 1px rgba(143,228,255,0.25), 0 14px 40px -14px var(--glow); }
@@ -184,9 +184,12 @@
   <nav class="top">
     <a class="brand" href="/">Breyes <b>Scales</b></a>
     <div class="nav-links">
+      <a class="hide-sm" href="/">Home</a>
       <a class="hide-sm" href="/#s-services">Services</a>
       <a class="hide-sm" href="/offers/" aria-current="page">Deals</a>
       <a class="hide-sm" href="/seo/">SEO &amp; AI Search</a>
+      <a class="hide-sm" href="/#s-about">About</a>
+      <a class="hide-sm" href="/#s-process">Process</a>
       <a class="btn btn-ghost btn-sm" href="sms:+13603168599"><span class="hide-xs">Text (360) 316-8599</span><span class="show-xs">Text us</span></a>
       <button class="mm-toggle" type="button" aria-expanded="false" aria-controls="mm-panel" aria-label="Open menu"><span></span><span></span><span></span></button>
     </div>
