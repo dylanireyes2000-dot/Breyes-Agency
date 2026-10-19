@@ -76,6 +76,28 @@
   .top{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding-top:18px; padding-bottom:18px; border-bottom:1px solid var(--line-soft); }
   .brand{ font-family:var(--f-display); font-weight:600; font-size:1.05rem; text-decoration:none; white-space:nowrap; }
   .brand b{ color:var(--blue); font-weight:600; }
+  .top{ position:relative; }
+  .nav-links{ display:flex; align-items:center; gap:26px; }
+  .nav-links > a:not(.btn){ font-size:.92rem; font-weight:600; color:var(--ink-soft); text-decoration:none; transition:color .25s var(--ease); }
+  .nav-links > a:not(.btn):hover, .nav-links > a[aria-current]{ color:var(--blue-bright); }
+  .show-xs{ display:none; }
+  @media (max-width:760px){ .nav-links a.hide-sm{ display:none; } .nav-links{ gap:10px; } }
+  @media (max-width:420px){ .hide-xs{ display:none; } .show-xs{ display:inline; } }
+
+  /* ---- mobile menu ---- */
+  .nav-links .btn{ white-space:nowrap; }
+  .mm-toggle{ display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:44px; height:44px; flex:none; padding:0; border-radius:12px; border:1px solid var(--line); background:rgba(160,210,255,0.04); cursor:pointer; }
+  .mm-toggle span{ display:block; width:18px; height:2px; border-radius:2px; background:var(--ink); transition:transform .3s var(--ease), opacity .2s var(--ease); }
+  .mm-toggle[aria-expanded="true"] span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .mm-toggle[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+  .mm-toggle[aria-expanded="true"] span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+  .mm-panel{ position:absolute; top:100%; left:50%; width:100vw; transform:translateX(-50%); z-index:30; padding:6px 16px 14px; background:var(--panel); border-bottom:1px solid var(--line); box-shadow:0 30px 50px -24px rgba(0,0,0,0.85); }
+  .mm-panel[hidden]{ display:none; }
+  .mm-panel a{ display:block; padding:14px 2px; font-family:var(--f-body); font-size:1.05rem; font-weight:600; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-soft); }
+  .mm-panel a:last-child{ border-bottom:0; }
+  .mm-panel a:hover, .mm-panel a[aria-current]{ color:var(--blue-bright); }
+  @media (max-width: 760px){ .mm-toggle{ display:inline-flex; } }
+  @media (min-width: 761px){ .mm-panel{ display:none !important; } }
 
   .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--f-body); font-weight:600; font-size:.98rem; text-decoration:none; padding:14px 22px; border-radius:999px; border:1px solid transparent; cursor:pointer; transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease); }
   .btn-blue{ color:#001523; background:linear-gradient(120deg, var(--blue-deep), var(--blue) 55%, var(--blue-bright)); box-shadow:0 0 0 1px rgba(143,228,255,0.25), 0 14px 40px -14px var(--glow); }
@@ -159,10 +181,24 @@
 <div class="holiday"><div class="wrap"><b>The holiday rush starts Black Friday, Nov 27.</b> Get ready now.</div></div>
 
 <div class="wrap">
-  <div class="top">
+  <nav class="top">
     <a class="brand" href="/">Breyes <b>Scales</b></a>
-    <a class="btn btn-ghost btn-sm" href="sms:+13603168599">Text (360) 316-8599</a>
-  </div>
+    <div class="nav-links">
+      <a class="hide-sm" href="/#s-services">Services</a>
+      <a class="hide-sm" href="/offers/" aria-current="page">Deals</a>
+      <a class="hide-sm" href="/seo/">SEO &amp; AI Search</a>
+      <a class="btn btn-ghost btn-sm" href="sms:+13603168599"><span class="hide-xs">Text (360) 316-8599</span><span class="show-xs">Text us</span></a>
+      <button class="mm-toggle" type="button" aria-expanded="false" aria-controls="mm-panel" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="mm-panel" id="mm-panel" hidden>
+      <a href="/">Home</a>
+      <a href="/#s-services">Services</a>
+      <a href="/offers/" aria-current="page">Deals</a>
+      <a href="/seo/">SEO &amp; AI Search</a>
+      <a href="/#s-about">About</a>
+      <a href="/#s-process">Process</a>
+    </div>
+  </nav>
 
   <main>
     <header class="intro">
@@ -248,6 +284,22 @@
     </div>
   </footer>
 </div>
+
+<script>
+(function () {
+  var t = document.querySelector(".mm-toggle"), p = document.getElementById("mm-panel");
+  if (!t || !p) return;
+  function set(open) {
+    p.hidden = !open;
+    t.setAttribute("aria-expanded", open ? "true" : "false");
+    t.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+  t.addEventListener("click", function () { set(p.hidden); });
+  p.addEventListener("click", function (e) { if (e.target.closest("a")) set(false); });
+  document.addEventListener("click", function (e) { if (!p.hidden && !p.contains(e.target) && !t.contains(e.target)) set(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !p.hidden) { set(false); t.focus(); } });
+})();
+</script>
 
 </body>
 </html>
