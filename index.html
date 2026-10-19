@@ -130,7 +130,23 @@
   .nav-links{ display: flex; gap: 30px; align-items: center; }
   .nav-links a{ font-size: .92rem; font-weight: 600; color: var(--ink-soft); text-decoration: none; letter-spacing: .01em; transition: color .25s var(--ease); }
   .nav-links a:hover{ color: var(--blue-bright); }
-  @media (max-width: 760px){ .nav-links a.hide-sm{ display: none; } .nav-links{ gap: 18px; } }
+  @media (max-width: 760px){ .nav-links a.hide-sm{ display: none; } .nav-links{ gap: 12px; } }
+  /* ---- mobile menu ---- */
+  .nav-links .btn{ white-space:nowrap; }
+  .nav-links a.btn-blue, .nav-links a.btn-blue:hover{ color:#001523; }
+  .mm-toggle{ display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:44px; height:44px; flex:none; padding:0; border-radius:12px; border:1px solid var(--line); background:rgba(160,210,255,0.04); cursor:pointer; }
+  .mm-toggle span{ display:block; width:18px; height:2px; border-radius:2px; background:var(--ink); transition:transform .3s var(--ease), opacity .2s var(--ease); }
+  .mm-toggle[aria-expanded="true"] span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .mm-toggle[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+  .mm-toggle[aria-expanded="true"] span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+  .mm-panel{ position:absolute; top:100%; left:0; right:0; z-index:30; padding:6px clamp(16px, 5vw, 48px) 14px; background:var(--panel); border-bottom:1px solid var(--line); box-shadow:0 30px 50px -24px rgba(0,0,0,0.85); }
+  .mm-panel[hidden]{ display:none; }
+  .mm-panel a{ display:block; padding:14px 2px; font-family:var(--f-body); font-size:1.05rem; font-weight:600; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-soft); }
+  .mm-panel a:last-child{ border-bottom:0; }
+  .mm-panel a:hover, .mm-panel a[aria-current]{ color:var(--blue-bright); }
+  @media (max-width: 760px){ .mm-toggle{ display:inline-flex; } }
+  @media (min-width: 761px){ .mm-panel{ display:none !important; } }
+
 
   .btn{ display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-body); font-weight: 600; font-size: 1rem; letter-spacing: .01em; text-decoration: none; padding: 15px 26px; border-radius: 999px; cursor: pointer; border: 1px solid transparent; transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
   .btn-blue{
@@ -233,12 +249,21 @@
   <nav>
     <a class="brand" href="#s-hero">Breyes <b>Scales</b></a>
     <div class="nav-links">
-      <a href="/offers/">Deals</a>
       <a class="hide-sm" href="#s-services">Services</a>
+      <a class="hide-sm" href="/offers/">Deals</a>
       <a class="hide-sm" href="/seo/">SEO &amp; AI Search</a>
       <a class="hide-sm" href="#s-about">About</a>
       <a class="hide-sm" href="#s-process">Process</a>
       <a class="btn btn-blue btn-sm" href="#s-cta">Book a call</a>
+      <button class="mm-toggle" type="button" aria-expanded="false" aria-controls="mm-panel" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+    <div class="mm-panel" id="mm-panel" hidden>
+      <a href="#s-hero" aria-current="page">Home</a>
+      <a href="#s-services">Services</a>
+      <a href="/offers/">Deals</a>
+      <a href="/seo/">SEO &amp; AI Search</a>
+      <a href="#s-about">About</a>
+      <a href="#s-process">Process</a>
     </div>
   </nav>
 
@@ -401,6 +426,22 @@
     <li><a href="https://www.ftc.gov/business-guidance/resources/truth-advertising" rel="noopener">Federal Trade Commission: truth in advertising guidance</a></li>
   </ul>
 </aside>
+
+<script>
+(function () {
+  var t = document.querySelector(".mm-toggle"), p = document.getElementById("mm-panel");
+  if (!t || !p) return;
+  function set(open) {
+    p.hidden = !open;
+    t.setAttribute("aria-expanded", open ? "true" : "false");
+    t.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+  t.addEventListener("click", function () { set(p.hidden); });
+  p.addEventListener("click", function (e) { if (e.target.closest("a")) set(false); });
+  document.addEventListener("click", function (e) { if (!p.hidden && !p.contains(e.target) && !t.contains(e.target)) set(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !p.hidden) { set(false); t.focus(); } });
+})();
+</script>
 
 <script>
 (function(){
